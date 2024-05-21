@@ -1,5 +1,4 @@
 import { TonClient } from "@ton/ton";
-import { useEffect, useState } from "react";
 import { useAsyncInitialize } from "./useAsyncInitialize";
 import { getHttpEndpoint } from "@orbs-network/ton-access";
 

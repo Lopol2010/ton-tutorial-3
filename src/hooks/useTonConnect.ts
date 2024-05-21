@@ -1,7 +1,4 @@
-import { Sender, SenderArguments, TonClient } from "@ton/ton";
-import { useEffect, useState } from "react";
-import { useAsyncInitialize } from "./useAsyncInitialize";
-import { getHttpEndpoint } from "@orbs-network/ton-access";
+import { Sender, SenderArguments} from "@ton/ton";
 import { useTonConnectUI } from "@tonconnect/ui-react";
 
 

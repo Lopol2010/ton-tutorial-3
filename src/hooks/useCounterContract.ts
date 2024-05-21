@@ -1,16 +1,14 @@
-import { Address, TonClient, beginCell, toNano } from "@ton/ton";
+import { Address } from "@ton/ton";
 import { useEffect, useState } from "react";
 import { useAsyncInitialize } from "./useAsyncInitialize";
-import { getHttpEndpoint } from "@orbs-network/ton-access";
 import { useTonClient } from "./useTonClient";
 import { Counter } from "../contracts/Counter";
-import { useTonConnectUI } from "@tonconnect/ui-react";
 import { useTonConnect } from "./useTonConnect";
 
 const counterAddress = "EQAQSCG0cIanpjYw9COWx8KxvquK7QEZQmBW_RRxCpscCOu7";
 export function useCounterContract() {
     const client = useTonClient();
-    const tonConnectUI = useTonConnect();
+    const {sender} = useTonConnect();
     const [counterValue, setCounterValue] = useState<null | number>();
 
     const counterContract = useAsyncInitialize(async () => {
@@ -36,8 +34,8 @@ export function useCounterContract() {
 
     return {
         counterValue,
-        increment: async () => {
-            await counterContract?.sendIncrement(tonConnectUI.sender);
+        increment: () => {
+            return counterContract?.sendIncrement(sender);
         },
         address: counterContract?.address.toString()
     };
