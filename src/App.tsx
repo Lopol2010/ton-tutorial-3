@@ -5,6 +5,8 @@ import './App.css'
 import { TonConnectButton } from '@tonconnect/ui-react'
 import { useCounterContract } from './hooks/useCounterContract'
 import { useTonConnect } from './hooks/useTonConnect'
+import '@twa-dev/sdk';
+
 
 function App() {
   const {counterValue, address, increment} = useCounterContract();
