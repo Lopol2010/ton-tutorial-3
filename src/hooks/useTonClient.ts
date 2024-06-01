@@ -1,10 +1,14 @@
 import { TonClient } from "@ton/ton";
-import { useAsyncInitialize } from "./useAsyncInitialize";
 import { getHttpEndpoint } from "@orbs-network/ton-access";
+import { useEffect, useState } from "react";
 
 
 export function useTonClient() {
-    return useAsyncInitialize(async () => {
-        return new TonClient({ endpoint: await getHttpEndpoint({ network: 'testnet' }) })
-    })
+    const [state, setState] = useState<TonClient>();
+    useEffect(() => {
+        (async () => {
+            setState(new TonClient({ endpoint: await getHttpEndpoint({ network: 'testnet' }) }))
+        })()
+    }, []);
+    return state;
 }

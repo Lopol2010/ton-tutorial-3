@@ -1,8 +1,8 @@
-import { Sender, SenderArguments} from "@ton/ton";
+import { Sender, SenderArguments } from "@ton/ton";
 import { useTonConnectUI } from "@tonconnect/ui-react";
 
 
-export function useTonConnect(): {sender: Sender, connected: boolean} {
+export function useTonConnect(): { sender: Sender, connected: boolean } {
     const [tonConnectUI] = useTonConnectUI();
     return {
         sender: {
@@ -15,8 +15,11 @@ export function useTonConnect(): {sender: Sender, connected: boolean} {
                             payload: args.body?.toBoc().toString("base64")
                         }
                     ],
-                    validUntil: Date.now() + 5 * 60 * 1000 // 5 min
-                })
+                    // validUntil: Date.now()/1000 + 5 * 60 * 1000 // 5 min
+                    validUntil: Math.floor(Date.now() / 1000) + 5 * 60
+
+                },
+                )
             }
         },
         connected: tonConnectUI.connected
