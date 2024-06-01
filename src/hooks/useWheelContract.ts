@@ -39,7 +39,7 @@ export function useWheelContract() {
 
     return {
         roundEnd: () => {
-            return wheelContract.sendEndRound(sender);
+            return wheelContract?.sendEndRound(sender);
         },
         deposit: (amount: string | bigint, deposit_owner: Address) => {
             return wheelContract?.sendDeposit(sender, amount, deposit_owner);

@@ -1,5 +1,5 @@
 import './App.css';
-import { TonConnectButton, toUserFriendlyAddress, useTonConnectUI } from '@tonconnect/ui-react';
+import { TonConnectButton, useTonConnectUI } from '@tonconnect/ui-react';
 import { useTonConnect } from './hooks/useTonConnect';
 import '@twa-dev/sdk';
 import { useWheelContract } from './hooks/useWheelContract';
