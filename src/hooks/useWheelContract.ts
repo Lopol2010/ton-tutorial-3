@@ -3,13 +3,22 @@ import { useEffect, useState } from "react";
 import { useTonClient } from "./useTonClient";
 import { Wheel } from "../contracts/Wheel";
 import { useTonConnect } from "./useTonConnect";
+import { useNetworkConfig } from "./useNetworkConfig";
 
-const counterAddress = "EQC7Ac9V_cXCH1tb4i6n35OKFby1FLQbbCHQzRb10Gk-H-BU";
 export function useWheelContract() {
     const client = useTonClient();
     const { sender } = useTonConnect();
 
-    type ContractStorageData = { startedAt: bigint; depositsCount: bigint; totalDepositedAmount: bigint; deposits: any[]; };
+    const [,,wheelAddress] = useNetworkConfig();
+
+    type ContractStorageData = { 
+        startedAt: number; 
+        depositsCount: number; 
+        totalDepositedAmount: bigint; 
+        comissionAddress: Address;
+        comissionPercent: number;
+        deposits: any[]; 
+    };
     const [contractData, setContractData] = useState<ContractStorageData>();
     const [contractBalance, setContractBalance] = useState<bigint>();
     
@@ -17,9 +26,9 @@ export function useWheelContract() {
     const [wheelContract, setOpenedWheelContract] = useState<OpenedContract<Wheel>>();
     useEffect(() => {
         if (!client) return;
-        const contract = new Wheel(Address.parse(counterAddress));
+        const contract = new Wheel(wheelAddress);
         setOpenedWheelContract(client.open(contract));
-    }, [client])
+    }, [client, wheelAddress])
 
     useEffect(() => {
         let intervalId: undefined | number;
@@ -28,7 +37,7 @@ export function useWheelContract() {
             if (!wheelContract) return;
             intervalId = setInterval(async () => {
                 // setContractData(null);
-                const data = await wheelContract.getDeposits();
+                const data = await wheelContract.getStorageData();
                 const balance = await wheelContract.getBalance();
                 setContractData(data);
                 setContractBalance(balance);
@@ -39,7 +48,7 @@ export function useWheelContract() {
 
     return {
         roundEnd: () => {
-            return wheelContract?.sendEndRound(sender);
+            return wheelContract?.sendTryEndRound(sender);
         },
         deposit: (amount: string | bigint, deposit_owner: Address) => {
             return wheelContract?.sendDeposit(sender, amount, deposit_owner);

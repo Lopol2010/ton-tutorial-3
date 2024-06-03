@@ -1,62 +1,70 @@
 import './App.css';
-import { TonConnectButton, useTonConnectUI } from '@tonconnect/ui-react';
+import { CHAIN, TonConnectButton, useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { useTonConnect } from './hooks/useTonConnect';
 import '@twa-dev/sdk';
 import { useWheelContract } from './hooks/useWheelContract';
 import { useEffect, useState } from 'react';
 import { Address, fromNano } from '@ton/core';
+import { useNetworkConfig } from './hooks/useNetworkConfig';
+import { useRoundTimer } from './hooks/useRoundTimer';
+
+function isValidAddress(address: string) {
+  return address.length > 0 && (Address.isFriendly(address) || Address.isRaw(address));
+}
 
 function App() {
   const [amount, setAmount] = useState("0.01");
   const { address, roundEnd, deposit, startedAt, totalDeposited, contractBalance } = useWheelContract();
-  const [depositOwner, setDepositOwner] = useState("")
+  const [beneficiaryAddress, setBeneficiaryAddress] = useState("")
   const { connected } = useTonConnect();
+  const roundTimerString = useRoundTimer(startedAt);
   const [tonConnectUI] = useTonConnectUI();
+  const tonWallet = useTonWallet();
+  const [isTestnet, , ] = useNetworkConfig();
 
   useEffect(() => {
     return tonConnectUI.onStatusChange(wallet => {
-      if (wallet)
-        setDepositOwner(Address.parse(wallet.account.address).toString());
-      else
-        setDepositOwner("");
+      if (wallet) {
+        if ((wallet.account.chain == CHAIN.TESTNET) != isTestnet) {
+          tonConnectUI.disconnect();
+          throw new Error("You connected wallet from network that differs from contract's network!");
+        }
+        setBeneficiaryAddress(Address.parse(wallet.account.address).toString());
+      } else {
+        setBeneficiaryAddress("");
+      }
     })
   }, [tonConnectUI])
-
-  function isValidAddress(address: string) {
-    return address.length > 0 && (Address.isFriendly(address) || Address.isRaw(address));
-  }
-  function formatRoundTime() {
-    if (totalDeposited && totalDeposited > 0n && startedAt && startedAt > 0) {
-      const timePassed = Date.now() / 1000 - startedAt;
-      return timePassed > 20 ? "round time elapsed" : timePassed;
-    } else return 'Not started'
-  }
 
   return (
     <div className='App'>
       <div className='Container'>
         <TonConnectButton />
 
-        <div className='Card'>
-          <b>Counter Address</b>
+        {/* <div className='Card'>
+          <b>Contract Address</b>
           <div className='Hint'>{address?.slice(0, 30) + '...'}</div>
-        </div>
+        </div> */}
 
         <div className='Card'>
           <b>Round timer:</b>
-          <div>{formatRoundTime()}</div>
+          <div>{roundTimerString}</div>
         </div>
         <div className='Card'>
           <b>Total deposited amount: </b>
           <div>{totalDeposited && contractBalance ? `${fromNano(totalDeposited)} (actual balance: ${fromNano(contractBalance)})` : "0"}</div>
         </div>
         <div>
-          <button className={`Button ${isValidAddress(depositOwner) && connected ? 'Active' : 'Disabled'}`}
+          {/* <button className={`Button ${isValidAddress(beneficiaryAddress) && connected ? 'Active' : 'Disabled'}`}
+            onClick={() => { toggleTestnet() }}>
+            toggle testnet {`${isTestnet} ${wheelAddress}`}
+          </button> */}
+          <button className={`Button ${isValidAddress(beneficiaryAddress) && connected ? 'Active' : 'Disabled'}`}
             onClick={() => { roundEnd() }}>
             Try end round
           </button>
-          <button className={`Button ${isValidAddress(depositOwner) && connected ? 'Active' : 'Disabled'}`}
-            onClick={() => { deposit(amount, Address.parse(depositOwner)) }}>
+          <button className={`Button ${isValidAddress(beneficiaryAddress) && connected ? 'Active' : 'Disabled'}`}
+            onClick={() => { if (tonWallet) deposit(amount, Address.parse(tonWallet.account.address)) }}>
             Deposit
           </button>
         </div>
@@ -64,11 +72,11 @@ function App() {
           placeholder="Deposit amount (default: 0.01)"
           value={amount}
           onChange={e => setAmount(e.target.value)} />
-        <input type="text" className="Input"
-          placeholder="Deposit owner address (default: your address)"
-          value={depositOwner.toString()}
-          onChange={e => { setDepositOwner(e.target.value); }} />
-        {isValidAddress(depositOwner) || depositOwner.length == 0 ? "" : <b>"Incorrect address!"</b>}
+        {/* <input type="text" className="Input"
+          placeholder="Beneficiary address (default: your address)"
+          value={beneficiaryAddress.toString()}
+          onChange={e => { setBeneficiaryAddress(e.target.value); }} />
+        {isValidAddress(beneficiaryAddress) || beneficiaryAddress.length == 0 ? "" : <b>"Incorrect address!"</b>} */}
       </div>
     </div>
   )
