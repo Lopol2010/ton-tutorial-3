@@ -14,7 +14,7 @@ function isValidAddress(address: string) {
 
 function App() {
   const [amount, setAmount] = useState("0.01");
-  const { address, roundEnd, deposit, startedAt, totalDeposited, contractBalance } = useWheelContract();
+  const { roundEnd, deposit, startedAt, totalDeposited, contractBalance } = useWheelContract();
   const [beneficiaryAddress, setBeneficiaryAddress] = useState("")
   const { connected } = useTonConnect();
   const roundTimerString = useRoundTimer(startedAt);
